@@ -32,3 +32,34 @@ print(query_embedding)
 # Multiple texts embedding
 texts_embeddings = embedding_model.embed(["Hello, world!", "Langchain is great for LLM-based applications."])
 print(texts_embeddings)
+
+
+from langchain_ollama import OllamaEmbeddings
+
+class CustomOllamaEmbeddingModel:
+    def __init__(self, model_name: str):
+        # Initialize the Ollama Embeddings model
+        self.model = OllamaEmbeddings(model=model_name)
+        
+    def embed(self, texts):
+        # Handle single string input or a list of texts
+        if isinstance(texts, str):
+            texts = [texts]
+        
+        # Get embeddings for each text
+        embeddings = [self.model.embed_query(text) for text in texts]
+        
+        return embeddings
+
+# Example usage
+model_name = "nomic-embeddings"
+embedding_model = CustomOllamaEmbeddingModel(model_name=model_name)
+
+# Single query embedding
+query_embedding = embedding_model.embed("Hello, world!")
+print(query_embedding)
+
+# Multiple texts embedding
+texts_embeddings = embedding_model.embed(["Hello, world!", "Langchain is great for LLM-based applications."])
+print(texts_embeddings)
+
