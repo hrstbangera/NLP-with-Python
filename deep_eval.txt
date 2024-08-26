@@ -1,0 +1,35 @@
+from deepeval.models import DeepEvalBaseLLM
+from langchain_community.llms import Ollama  # Import the Ollama model
+
+class CustomOllamaModel(DeepEvalBaseLLM):
+    def __init__(self):
+        # Initialize the Ollama model
+        self.model = Ollama(model="gemma2")  # Replace with the desired Ollama model name
+        self.tokenizer = None  # Ollama models don't require a separate tokenizer
+
+    def load_model(self):
+        return self.model
+
+    def generate(self, prompt: str) -> str:
+        model = self.load_model()
+        
+        # Generate text using the Ollama model
+        response = model(prompt)  # Assuming `model` is callable and returns the response text
+
+        return response
+
+    async def a_generate(self, prompt: str) -> str:
+        # Use the same synchronous generate method for now
+        return self.generate(prompt)
+
+    def get_model_name(self):
+        return "Ollama-Gemma2"  # Replace with the appropriate Ollama model name
+
+# Example usage
+custom_llm = CustomOllamaModel()
+print(custom_llm.generate("Write me a joke"))
+
+from deepeval.metrics import AnswerRelevancyMetric
+
+metric = AnswerRelevancyMetric(model=custom_llm)
+# metric.measure(...)  # Use this with appropriate input for evaluation
