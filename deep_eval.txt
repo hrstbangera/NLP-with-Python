@@ -33,3 +33,42 @@ from deepeval.metrics import AnswerRelevancyMetric
 
 metric = AnswerRelevancyMetric(model=custom_llm)
 # metric.measure(...)  # Use this with appropriate input for evaluation
+---------------------
+
+from deepeval.scorer import Scorer
+from deepeval.metrics import BaseMetric
+from deepeval.test_case import LLMTestCase
+
+class RougeMetric(BaseMetric):
+    def __init__(self, threshold: float = 0.5):
+        self.threshold = threshold
+        self.scorer = Scorer()  # Initialize the Scorer here
+        self.success = False  # Initialize self.success here
+
+    def measure(self, test_case: LLMTestCase):
+        # Measure the Rouge score using the scorer object
+        self.score = self.scorer.rouge_score(
+            prediction=test_case.actual_output,
+            target=test_case.expected_output,
+            score_type="rouge1"
+        )
+        self.success = self.score >= self.threshold
+        return self.score
+
+    async def a_measure(self, test_case: LLMTestCase):
+        return self.measure(test_case)
+
+    def is_successful(self):
+        return self.success
+
+    @property
+    def __name__(self):
+        return "Rouge Metric"
+
+# Example usage
+test_case = LLMTestCase(input="What is AI?", actual_output="AI stands for Artificial Intelligence.", expected_output="AI is short for Artificial Intelligence.")
+metric = RougeMetric()
+
+metric.measure(test_case)
+print(metric.is_successful())
+
