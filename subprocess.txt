@@ -1,0 +1,57 @@
+import subprocess
+import time
+import os
+import signal
+
+# Step 1: Start backend and frontend using subprocess
+backend_process = subprocess.Popen(["python", "server/local_server.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+frontend_process = subprocess.Popen(["streamlit", "run", "streamlit/ui.py", "--server.port", "4550"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+print(f"Backend PID: {backend_process.pid}, Frontend PID: {frontend_process.pid}")
+
+# Step 2: Wait for 1 hour (3600 seconds)
+time.sleep(3600)
+
+# Step 3: Kill both backend and frontend processes
+os.kill(backend_process.pid, signal.SIGTERM)  # Terminate backend
+os.kill(frontend_process.pid, signal.SIGTERM)  # Terminate frontend
+
+print("Both backend and frontend processes have been terminated.")
+---------------
+
+import subprocess
+import time
+import os
+import signal
+import threading
+
+def start_backend():
+    global backend_process
+    backend_process = subprocess.Popen(["python", "server/local_server.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(f"Backend started with PID: {backend_process.pid}")
+
+def start_frontend():
+    global frontend_process
+    frontend_process = subprocess.Popen(["streamlit", "run", "streamlit/ui.py", "--server.port", "4550"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(f"Frontend started with PID: {frontend_process.pid}")
+
+def stop_processes_after_delay(delay):
+    time.sleep(delay)
+    os.kill(backend_process.pid, signal.SIGTERM)  # Terminate backend
+    os.kill(frontend_process.pid, signal.SIGTERM)  # Terminate frontend
+    print("Both backend and frontend processes have been terminated.")
+
+# Start backend and frontend in separate threads
+backend_thread = threading.Thread(target=start_backend)
+frontend_thread = threading.Thread(target=start_frontend)
+
+backend_thread.start()
+frontend_thread.start()
+
+# Wait for both threads to start processes
+backend_thread.join()
+frontend_thread.join()
+
+# Schedule the stop after 1 hour
+stop_thread = threading.Thread(target=stop_processes_after_delay, args=(3600,))
+stop_thread.start()
