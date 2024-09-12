@@ -55,3 +55,16 @@ frontend_thread.join()
 # Schedule the stop after 1 hour
 stop_thread = threading.Thread(target=stop_processes_after_delay, args=(3600,))
 stop_thread.start()
+
+------------------
+
+import psutil
+
+def kill_process_using_port(port):
+    for proc in psutil.process_iter(['pid', 'name', 'connections']):
+        for conn in proc.info['connections']:
+            if conn.laddr.port == port:
+                print(f"Killing process {proc.info['name']} with PID {proc.info['pid']} on port {port}")
+                proc.kill()
+
+kill_process_using_port(4550)
