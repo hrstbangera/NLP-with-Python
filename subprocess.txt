@@ -68,3 +68,60 @@ def kill_process_using_port(port):
                 proc.kill()
 
 kill_process_using_port(4550)
+---------------
+
+
+import ollama
+
+# Initialize the Ollama model
+model = ollama.Ollama('gemma2')
+
+# Define the two questions for comparison
+q1 = "How do I support my spouse during a difficult time?"
+q2 = "How do I help my partner through a tough time?"
+
+# Create the few-shot prompt with examples
+prompt = f"""
+Given two questions, compare their similarity based on content and intent.
+
+Treat questions as similar if they refer to the same relationship (e.g., spousal relationship) but use different wording.
+Do not match questions where the roles change or imply different responsibilities (e.g., 'manager' vs. 'employee').
+
+Provide the result in JSON format with two fields:
+- "match": true or false
+- "reason": a brief explanation for why the questions are matched or not.
+
+### Example 1:
+Question 1: "How do I support my spouse during a difficult time?"
+Question 2: "How do I help my partner through a tough time?"
+
+Output:
+{{
+  "match": true,
+  "reason": "Both questions refer to supporting a spouse/partner during a difficult time, using different wording but sharing the same intent."
+}}
+
+### Example 2:
+Question 1: "What are my responsibilities as a team lead?"
+Question 2: "What are the tasks of a team member?"
+
+Output:
+{{
+  "match": false,
+  "reason": "The first question refers to a team lead's responsibilities, while the second refers to a team member's tasks, which implies different roles."
+}}
+
+### Now, compare the following questions:
+
+Question 1: "{q1}"
+Question 2: "{q2}"
+
+Output the result in the same JSON format.
+"""
+
+# Generate a response from the model
+response = model.generate(prompt=prompt)
+
+# Output the model's response
+print(response['text'])
+
