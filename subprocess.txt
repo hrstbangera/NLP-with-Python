@@ -158,4 +158,26 @@ class CustomEmbeddingModel(DeepEvalBaseEmbeddingModel):
 
     def get_model_name(self):
         return "Custom Ollama Embedding Model"
+----------------
+def process_query(user_query):
+    appendix_details = {
+        'tier 1': 'Details about tier 1...',
+        'tier 2': 'Details about tier 2...',
+        'tier 3': 'Details about tier 3...',
+        'approved brokers list': 'List of approved brokers...'
+    }
+
+    prompt = user_query  # Start with the user query as the base prompt
+
+    # Check for specific keywords and append appendix details
+    for keyword, details in appendix_details.items():
+        if keyword.lower() in user_query.lower():
+            prompt += f"\n\n{details}"
+
+    return prompt
+
+# Example usage:
+user_query = "What is the process for tier 1 suppliers?"
+final_prompt = process_query(user_query)
+print(final_prompt)
 
