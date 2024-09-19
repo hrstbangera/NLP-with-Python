@@ -220,4 +220,44 @@ def process_query(user_query):
 user_query = "Can you explain the process for tier 1 and approved brokers?"
 final_prompt = process_query(user_query)
 print(final_prompt)
+----------------------
+
+import ollama
+
+# Define the function tool for question comparison
+compare_questions_tool = {
+    'type': 'function',
+    'function': {
+        'name': 'compare_questions',
+        'description': 'Compare two questions to check if they match in terms of content and intent.',
+        'parameters': {
+            'type': 'object',
+            'properties': {
+                'question1': {
+                    'type': 'string',
+                    'description': 'The first question to compare',
+                },
+                'question2': {
+                    'type': 'string',
+                    'description': 'The second question to compare',
+                },
+            },
+            'required': ['question1', 'question2'],
+        },
+    }
+}
+
+# Define the two questions for comparison
+q1 = "How do I support my spouse during a difficult time?"
+q2 = "How do I help my partner through a tough time?"
+
+# Create the Ollama chat request with tool calling
+response = ollama.chat(
+    model='llama3.1',
+    messages=[{'role': 'user', 'content': f'Compare the following questions:\nQuestion 1: {q1}\nQuestion 2: {q2}'}],
+    tools=[compare_questions_tool]
+)
+
+# Output the response and any tool calls
+print(response['message']['tool_calls'])
 
