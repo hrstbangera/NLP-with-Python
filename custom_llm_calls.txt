@@ -1,0 +1,70 @@
+from langchain.llms.base import LLM
+from typing import Optional, List
+import requests
+import json
+
+class CustomGPT4LLM(LLM):
+    def __init__(self, api_url: str, client_id: str, client_secret: str, access_token: str):
+        self.api_url = api_url
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.access_token = access_token
+
+    def _call(self, prompt: str, stop: Optional[List[str]] = None) -> str:
+        headers = {
+            "genaiclient": self.client_id,
+            "genaiauth": self.client_secret,
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+
+        payload = json.dumps({
+            "rai_model": "apenai-gpt4-32k_auto",
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 100,
+            "n": 1,
+            "temperature": 0.7
+        })
+
+        # Make the API request
+        response = requests.request("POST", self.api_url, headers=headers, data=payload, verify=False)
+        
+        # Extract the response
+        if response.status_code == 200:
+            result = response.json()
+            # Assuming the response has this structure; adjust if necessary
+            return result['choices'][0]['message']['content']
+        else:
+            raise Exception(f"API call failed with status code {response.status_code}: {response.text}")
+
+    @property
+    def _identifying_params(self) -> dict:
+        """Return the identifying parameters."""
+        return {"api_url": self.api_url}
+
+    @property
+    def _llm_type(self) -> str:
+        """Return the LLM type."""
+        return "custom_gpt4"
+
+# Example usage with LangChain
+custom_llm = CustomGPT4LLM(
+    api_url=f"{host}/rai-llm-gateway/v1/gateway/chat",
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    access_token="your_access_token"
+)
+
+# You can now use this LLM like any other LLM in LangChain.
+from langchain import PromptTemplate, LLMChain
+
+template = "What is a good name for a company that makes {product}?"
+prompt = PromptTemplate(template=template, input_variables=["product"])
+
+llm_chain = LLMChain(llm=custom_llm, prompt=prompt)
+
+# Test the chain with a product
+print(llm_chain.run("AI tools"))
