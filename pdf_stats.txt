@@ -56,3 +56,80 @@ if __name__ == '__main__':
     save_to_excel(pdf_stats, output_file)
 
     print(f'Stats saved to {output_file}')
+----------------------------------------
+import os
+import pdfplumber
+import pandas as pd
+from collections import Counter
+import string
+
+def extract_pdf_stats(pdf_path):
+    stats = {}
+    stats['file_name'] = os.path.basename(pdf_path)
+
+    # Open PDF to count pages and extract text
+    with pdfplumber.open(pdf_path) as pdf:
+        stats['pages'] = len(pdf.pages)
+        
+        total_words = 0
+        total_characters = 0
+        total_lines = 0
+        word_counter = Counter()
+        image_count = 0
+        
+        for page in pdf.pages:
+            text = page.extract_text()
+            if text:
+                # Count words and characters
+                words = text.split()
+                total_words += len(words)
+                total_characters += len(text)
+                
+                # Remove punctuation and lower case for word frequency analysis
+                clean_text = text.translate(str.maketrans('', '', string.punctuation)).lower()
+                word_counter.update(clean_text.split())
+                
+                # Count lines (splitting text by line breaks)
+                total_lines += text.count('\n')
+                
+            # Count images
+            if 'images' in page.objects:
+                image_count += len(page.objects['images'])
+
+        # Calculate unique words and word density
+        stats['words'] = total_words
+        stats['characters'] = total_characters
+        stats['avg_words_per_page'] = total_words / stats['pages'] if stats['pages'] > 0 else 0
+        stats['unique_words'] = len(word_counter)
+        stats['word_density'] = total_words / total_characters if total_characters > 0 else 0
+        stats['images'] = image_count
+        stats['lines'] = total_lines
+
+    return stats
+
+def process_pdf_folder(folder_path):
+    pdf_stats = []
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.pdf'):
+            pdf_path = os.path.join(folder_path, file_name)
+            stats = extract_pdf_stats(pdf_path)
+            pdf_stats.append(stats)
+
+    return pdf_stats
+
+def save_to_excel(pdf_stats, output_file):
+    # Create a DataFrame from the stats and save to Excel
+    df = pd.DataFrame(pdf_stats)
+    df.to_excel(output_file, index=False)
+
+if __name__ == '__main__':
+    folder_path = 'path_to_your_pdf_folder'  # Replace with the path to your folder
+    output_file = 'pdf_stats.xlsx'  # Output Excel file name
+
+    # Process PDFs and generate stats
+    pdf_stats = process_pdf_folder(folder_path)
+
+    # Save the results to Excel
+    save_to_excel(pdf_stats, output_file)
+
+    print(f'Stats saved to {output_file}')
