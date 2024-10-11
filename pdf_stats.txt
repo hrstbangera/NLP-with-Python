@@ -1,0 +1,51 @@
+import os
+import PyPDF2
+import pdfplumber
+import pandas as pd
+
+def extract_pdf_stats(pdf_path):
+    stats = {}
+    stats['file_name'] = os.path.basename(pdf_path)
+
+    # Open PDF to count pages and extract text
+    with pdfplumber.open(pdf_path) as pdf:
+        # Get number of pages
+        stats['pages'] = len(pdf.pages)
+        
+        # Extract all text and count words
+        total_words = 0
+        for page in pdf.pages:
+            text = page.extract_text()
+            if text:
+                total_words += len(text.split())
+        
+        stats['words'] = total_words
+
+    return stats
+
+def process_pdf_folder(folder_path):
+    pdf_stats = []
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.pdf'):
+            pdf_path = os.path.join(folder_path, file_name)
+            stats = extract_pdf_stats(pdf_path)
+            pdf_stats.append(stats)
+
+    return pdf_stats
+
+def save_to_excel(pdf_stats, output_file):
+    # Create a DataFrame from the stats and save to Excel
+    df = pd.DataFrame(pdf_stats)
+    df.to_excel(output_file, index=False)
+
+if __name__ == '__main__':
+    folder_path = 'path_to_your_pdf_folder'  # Replace with the path to your folder
+    output_file = 'pdf_stats.xlsx'  # Output Excel file name
+
+    # Process PDFs and generate stats
+    pdf_stats = process_pdf_folder(folder_path)
+
+    # Save the results to Excel
+    save_to_excel(pdf_stats, output_file)
+
+    print(f'Stats saved to {output_file}')
