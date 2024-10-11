@@ -1,5 +1,4 @@
 import os
-import PyPDF2
 import pdfplumber
 import pandas as pd
 
@@ -12,14 +11,22 @@ def extract_pdf_stats(pdf_path):
         # Get number of pages
         stats['pages'] = len(pdf.pages)
         
-        # Extract all text and count words
+        # Initialize word and character counts
         total_words = 0
+        total_characters = 0
+        
+        # Extract text from each page and count words and characters
         for page in pdf.pages:
             text = page.extract_text()
             if text:
-                total_words += len(text.split())
-        
+                words = text.split()
+                total_words += len(words)
+                total_characters += len(text)
+
+        # Calculate average words per page
         stats['words'] = total_words
+        stats['characters'] = total_characters
+        stats['avg_words_per_page'] = total_words / stats['pages'] if stats['pages'] > 0 else 0
 
     return stats
 
