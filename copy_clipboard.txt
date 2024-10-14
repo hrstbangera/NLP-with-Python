@@ -131,3 +131,35 @@ if st.button("Copy to clipboard"):
         copyToClipboard(`{st.session_state['answer']}`);
         </script>
     """, height=0)
+
+
+Hello there! 
+
+Hello there! How can I assist you today?
+---------------------------------
+import streamlit as st
+
+# Example chatbot response stored in session state (replace with your actual chatbot response logic)
+if 'answer' not in st.session_state:
+    st.session_state['answer'] = "This is the latest response from the bot."
+
+# Display the latest response
+st.write(f"Bot: {st.session_state['answer']}")
+
+# Use st.markdown to inject HTML and JavaScript for clipboard functionality
+st.markdown(f"""
+    <script>
+    function copyToClipboard() {{
+        const textToCopy = `{st.session_state['answer']}`;
+        const textarea = document.createElement('textarea');
+        textarea.value = textToCopy;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Copied to clipboard!');
+    }}
+    </script>
+    <button onclick="copyToClipboard()">Copy to clipboard</button>
+""", unsafe_allow_html=True)
+
