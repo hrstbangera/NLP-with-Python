@@ -1,0 +1,23 @@
+import streamlit as st
+
+# Example chatbot response (You would replace this with your chatbot's actual response)
+latest_response = "This is the latest response from the bot."
+
+# Display the latest response
+st.write(f"Bot: {latest_response}")
+
+# Add a button to copy the response to the clipboard
+copy_button = st.button("Copy to clipboard")
+
+# JavaScript code to copy the latest response to clipboard
+if copy_button:
+    st.write("""
+        <script>
+        const response = `"{}"`;
+        navigator.clipboard.writeText(response).then(() => {
+            alert('Copied to clipboard!');
+        }).catch(err => {
+            alert('Failed to copy text: ' + err);
+        });
+        </script>
+    """.format(latest_response), unsafe_allow_html=True)
