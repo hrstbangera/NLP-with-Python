@@ -21,3 +21,29 @@ if copy_button:
         });
         </script>
     """.format(latest_response), unsafe_allow_html=True)
+-----------------
+
+
+import streamlit as st
+
+# Example chatbot response (replace with your chatbot's actual response)
+latest_response = "This is the latest response from the bot."
+
+# Display the latest response
+st.write(f"Bot: {latest_response}")
+
+# Add a button to copy the response to the clipboard
+copy_button = st.button("Copy to clipboard", key="copy_button")
+
+# JavaScript code to copy the latest response to clipboard
+if copy_button:
+    st.markdown(f"""
+        <script>
+        const response = `{latest_response}`;
+        navigator.clipboard.writeText(response).then(() => {{
+            alert('Copied to clipboard!');
+        }}).catch(err => {{
+            console.error('Failed to copy text: ', err);
+        }});
+        </script>
+    """, unsafe_allow_html=True)
