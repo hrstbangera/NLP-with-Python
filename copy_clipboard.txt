@@ -210,3 +210,32 @@ copy_button_html = f"""
 # Display the HTML in Streamlit
 st.components.v1.html(copy_button_html)
 ---------------------
+import streamlit as st
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Display the content
+st.write("Text to copy:")
+st.code(text_to_copy, language="text")
+
+# Button to copy to clipboard using HTML and JS with proper error handling
+copy_button_html = f"""
+    <script>
+        function copyToClipboard() {{
+            if (navigator.clipboard) {{
+                navigator.clipboard.writeText("{text_to_copy}").then(function() {{
+                    alert('Text copied to clipboard!');
+                }}, function(err) {{
+                    console.error('Could not copy text: ', err);
+                }});
+            }} else {{
+                alert('Clipboard API not supported!');
+            }}
+        }}
+    </script>
+    <button onclick="copyToClipboard()">Copy to clipboard</button>
+"""
+
+# Display the HTML in Streamlit
+st.components.v1.html(copy_button_html)
