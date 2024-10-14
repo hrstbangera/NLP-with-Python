@@ -74,4 +74,32 @@ if copy_button:
         }});
         </script>
     """, unsafe_allow_html=True)
+---------------
+import streamlit as st
+
+# Example chatbot response stored in session state (replace with your actual chatbot response logic)
+if 'answer' not in st.session_state:
+    st.session_state['answer'] = "This is the latest response from the bot."
+
+# Display the latest response
+st.write(f"Bot: {st.session_state['answer']}")
+
+# Create a hidden text input field to hold the text you want to copy
+st.text_input("Hidden text field", st.session_state['answer'], key="copy_text", type="default")
+
+# Add a button to trigger the clipboard copy
+copy_button = st.button("Copy to clipboard", key="copy_button")
+
+# Inject JavaScript to copy text from the hidden text field to clipboard
+if copy_button:
+    st.markdown(f"""
+        <script>
+        var copyText = document.getElementById('copy_text');
+        navigator.clipboard.writeText(copyText.value).then(() => {{
+            alert('Copied to clipboard!');
+        }}).catch(err => {{
+            console.error('Failed to copy text: ', err);
+        }});
+        </script>
+    """, unsafe_allow_html=True)
 
