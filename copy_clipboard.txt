@@ -103,3 +103,31 @@ if copy_button:
         </script>
     """, unsafe_allow_html=True)
 
+-------------------------------------
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Example chatbot response stored in session state (replace with your actual chatbot response logic)
+if 'answer' not in st.session_state:
+    st.session_state['answer'] = "This is the latest response from the bot."
+
+# Display the latest response
+st.write(f"Bot: {st.session_state['answer']}")
+
+# Button to trigger the copy action
+if st.button("Copy to clipboard"):
+    # Inject custom HTML and JavaScript directly using Streamlit's components.html
+    components.html(f"""
+        <script>
+        function copyToClipboard(text) {{
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Copied to clipboard!');
+        }}
+        copyToClipboard(`{st.session_state['answer']}`);
+        </script>
+    """, height=0)
