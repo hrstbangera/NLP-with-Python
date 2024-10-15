@@ -267,3 +267,32 @@ copy_button_html = f"""
 
 # Display the HTML in Streamlit
 st.components.v1.html(copy_button_html)
+----------------
+import streamlit as st
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Display the content
+st.write("Text to copy:")
+st.code(text_to_copy, language="text")
+
+# Streamlit Button
+if st.button('Copy to clipboard'):
+    # Use st.components to embed the HTML + JS to copy the text to clipboard
+    copy_script = f"""
+    <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+    <script>
+        function copyFallback() {{
+            var copyText = document.getElementById("textToCopy");
+            copyText.select();
+            document.execCommand("copy");
+            alert("Text copied to clipboard!");
+        }}
+        copyFallback();
+    </script>
+    """
+    
+    # Display the hidden input field and run the JavaScript when the button is clicked
+    st.components.v1.html(copy_script)
+
