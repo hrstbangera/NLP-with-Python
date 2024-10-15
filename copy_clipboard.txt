@@ -495,3 +495,65 @@ with col3:
 # You can use col4 for other functionality or leave it empty for now.
 with col4:
     st.write("Other functionality here.")
+-----------------------------------------------
+
+
+import streamlit as st
+
+# Simulate user input (you can replace this with actual user input logic)
+user_input = st.text_input("Enter something to enable buttons:")
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Create four columns with the specified layout ratios
+col1, col2, col3, col4 = st.columns([0.5, 0.5, 4, 4])
+
+with col1:
+    if user_input:  # Only show the thumbs-up button if there's user input
+        # Button with rounded edges
+        if st.button("+1 👍", key="thumbs_up"):
+            st.write("You clicked thumbs up!")
+
+with col2:
+    if user_input:  # Only show the thumbs-down button if there's user input
+        # Button with rounded edges
+        if st.button("-1 👎", key="thumbs_down"):
+            st.write("You clicked thumbs down!")
+
+with col3:
+    if user_input:  # Only show the copy to clipboard button if there's user input
+        # HTML for the copy to clipboard button using Font Awesome icon
+        copy_button_html = f"""
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+            <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+            <button style="
+                background-color: #f0f0f0;  /* Light background color */
+                border: 2px solid #ccc;      /* Border color */
+                border-radius: 5px;          /* Slightly rounded edges */
+                cursor: pointer;
+                font-size: 1.5em;
+                padding: 10px 20px;          /* Increased padding for a rectangular shape */
+                vertical-align: middle;       /* Aligns button with other elements */
+                display: flex;                /* Flexbox for centering */
+                align-items: center;          /* Center vertically */
+                justify-content: center;      /* Center horizontally */
+            " title="Copy to clipboard" onclick="copyFallback()">
+                <i class="fa-regular fa-clipboard"></i>
+            </button>
+
+            <script>
+                function copyFallback() {{
+                    var copyText = document.getElementById("textToCopy");
+                    copyText.select();
+                    document.execCommand("copy");
+                    alert("Text copied to clipboard!");
+                }}
+            </script>
+        """
+        # Display the copy to clipboard button
+        st.components.v1.html(copy_button_html, height=50)
+
+# You can use col4 for other functionality or leave it empty for now.
+with col4:
+    st.write("Other functionality here.")
