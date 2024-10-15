@@ -630,4 +630,50 @@ with col3:
 # You can use col4 for other functionality or leave it empty for now.
 with col4:
     st.write("Other functionality here.")
+------------------
+import streamlit as st
+
+# Simulate user input (you can replace this with actual user input logic)
+user_input = st.text_input("Enter something to enable buttons:")
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Create four columns with the specified layout ratios
+col1, col2, col3, col4 = st.columns([0.5, 0.5, 4, 4])
+
+with col1:
+    if user_input:  # Only show the thumbs-up button if there's user input
+        if st.button("+1 👍", key="thumbs_up"):
+            st.write("You clicked thumbs up!")
+
+with col2:
+    if user_input:  # Only show the thumbs-down button if there's user input
+        if st.button("-1 👎", key="thumbs_down"):
+            st.write("You clicked thumbs down!")
+
+with col3:
+    if user_input:  # Only show the copy to clipboard button if there's user input
+        if st.button("📋 Copy to clipboard"):
+            # Inject JavaScript to handle clipboard copy using the `execCommand('copy')` method
+            copy_button_html = f"""
+                <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+                <script>
+                    function copyFallback() {{
+                        var copyText = document.getElementById("textToCopy");
+                        copyText.style.display = 'block';  // Make the input visible
+                        copyText.select();  // Select the content
+                        document.execCommand('copy');  // Copy the selected text
+                        copyText.style.display = 'none';  // Hide the input after copying
+                        alert("Text copied to clipboard: " + copyText.value);
+                    }}
+                    copyFallback();  // Trigger the copy function immediately when button is clicked
+                </script>
+            """
+            # Inject the HTML and JavaScript into the app
+            st.markdown(copy_button_html, unsafe_allow_html=True)
+
+# Use col4 for other functionality or leave it empty
+with col4:
+    st.write("Other functionality here.")
 
