@@ -870,3 +870,87 @@ with col3:
 with col4:
     st.write("Other functionality here.")
 
+---------------------
+import streamlit as st
+
+# Simulate user input
+user_input = st.text_input("Enter something to enable buttons:")
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Define button styles for thumbs up, thumbs down, and copy button
+button_style = """
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+    vertical-align: middle;
+    height: 38px;
+    line-height: 38px;
+    box-sizing: border-box;
+"""
+button_hover_style = """
+    .custom-btn:hover {
+        border-color: black;
+    }
+"""
+
+# Create columns for layout
+col1, col2, col3, col4 = st.columns([0.5, 0.5, 4, 4])
+
+# Custom thumbs-up button using st.components.v1.html
+with col1:
+    if user_input:
+        thumbs_up_button_html = f"""
+        <style>
+            {button_hover_style}
+        </style>
+        <div class="custom-btn" style="{button_style}" onclick="window.alert('You clicked thumbs up!');">:+1:</div>
+        """
+        st.components.v1.html(thumbs_up_button_html, height=50)
+
+# Custom thumbs-down button using st.components.v1.html
+with col2:
+    if user_input:
+        thumbs_down_button_html = f"""
+        <style>
+            {button_hover_style}
+        </style>
+        <div class="custom-btn" style="{button_style}" onclick="window.alert('You clicked thumbs down!');">:-1:</div>
+        """
+        st.components.v1.html(thumbs_down_button_html, height=50)
+
+# Custom copy to clipboard button
+with col3:
+    if user_input:
+        copy_button_html = f"""
+            <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+            <style>
+                .copy-btn {{
+                    {button_style}
+                }}
+                .copy-btn:hover {{
+                    border-color: black;
+                }}
+            </style>
+            <button class="copy-btn" onclick="copyFallback()">📋</button>
+
+            <script>
+                function copyFallback() {{
+                    var copyText = document.getElementById("textToCopy");
+                    copyText.select();
+                    document.execCommand('copy');
+                    alert('Text copied to clipboard!');
+                }}
+            </script>
+        """
+        st.components.v1.html(copy_button_html, height=50)
+
+with col4:
+    st.write("Other functionality here.")
