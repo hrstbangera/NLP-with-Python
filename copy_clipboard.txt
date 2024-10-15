@@ -435,3 +435,63 @@ with col3:
 with col4:
     st.write("Other functionality here.")
 
+-------------------------------
+import streamlit as st
+
+# Simulate user input (you can replace this with actual user input logic)
+user_input = st.text_input("Enter something to enable buttons:")
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Create four columns with the specified layout ratios
+col1, col2, col3, col4 = st.columns([0.5, 0.5, 4, 4])
+
+with col1:
+    if user_input:  # Only show the thumbs-up button if there's user input
+        if st.button("+1 👍", key="thumbs_up", help="Give a thumbs up!"):
+            st.write("You clicked thumbs up!")
+
+with col2:
+    if user_input:  # Only show the thumbs-down button if there's user input
+        if st.button("-1 👎", key="thumbs_down", help="Give a thumbs down!"):
+            st.write("You clicked thumbs down!")
+
+with col3:
+    if user_input:  # Only show the copy to clipboard button if there's user input
+        # HTML for the copy to clipboard button with rounded style
+        copy_button_html = f"""
+            <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+            <button style="
+                background-color: #f0f0f0;  /* Light background color */
+                border: 2px solid #ccc;      /* Border color */
+                border-radius: 25px;         /* Rounded edges */
+                cursor: pointer;
+                font-size: 1.5em;
+                padding: 10px 15px;          /* Padding for better click area */
+                vertical-align: middle;       /* Aligns button with other elements */
+                line-height: 1.5em;           /* Ensures button height matches */
+            " title="Copy to clipboard" onclick="copyFallback()">📋</button>
+
+            <script>
+                function copyFallback() {{
+                    var copyText = document.getElementById("textToCopy");
+                    copyText.select();
+                    document.execCommand("copy");
+                    alert("Text copied to clipboard!");
+                }}
+            </script>
+            <style>
+                button {{
+                    margin: 0;
+                    padding: 0;
+                    vertical-align: middle;  /* Aligns the button inline */
+                }}
+            </style>
+        """
+        # Display the copy to clipboard button
+        st.components.v1.html(copy_button_html, height=50)
+
+# You can use col4 for other functionality or leave it empty for now.
+with col4:
+    st.write("Other functionality here.")
