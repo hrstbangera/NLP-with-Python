@@ -332,3 +332,46 @@ copy_button_html = f"""
 # Display the HTML button in Streamlit
 st.components.v1.html(copy_button_html)
 
+---------------------
+import streamlit as st
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Display the content
+st.write("Text to copy:")
+st.code(text_to_copy, language="text")
+
+# HTML button that looks like an icon (📋) and doesn't cause layout issues
+copy_button_html = f"""
+    <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+    <button style="
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 1.5em;
+    " title="Copy to clipboard" onclick="copyFallback()">📋</button>
+
+    <script>
+        function copyFallback() {{
+            var copyText = document.getElementById("textToCopy");
+            copyText.select();
+            document.execCommand("copy");
+            alert("Text copied to clipboard!");
+        }}
+    </script>
+    <style>
+        /* Remove excess margin or padding added by Streamlit */
+        button {{
+            margin: 0;
+            padding: 0;
+        }}
+    </style>
+"""
+
+# Display the HTML button in Streamlit
+st.components.v1.html(copy_button_html, height=50)
+
+# Other Streamlit buttons (for other functionalities)
+if st.button("Another Functionality Button"):
+    st.write("Another functionality triggered!")
