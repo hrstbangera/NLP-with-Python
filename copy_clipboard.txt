@@ -557,3 +557,30 @@ with col3:
 # You can use col4 for other functionality or leave it empty for now.
 with col4:
     st.write("Other functionality here.")
+
+
+----
+import streamlit as st
+import pyperclip
+
+# Initialize session state for the button
+if 'button_clicked' not in st.session_state:
+    st.session_state['button_clicked'] = False
+
+def copy_to_clipboard(text):
+    # Copy the text to the clipboard
+    pyperclip.copy(text)
+    st.session_state['button_clicked'] = True
+    st.write("Text copied to clipboard!")
+
+# Text to copy
+text_to_copy = "This is the text to copy."
+
+# Button to trigger the action
+if st.button("Copy Text"):
+    copy_to_clipboard(text_to_copy)
+
+# Check if the button has been clicked
+if st.session_state['button_clicked']:
+    st.write("Action has been performed!")
+
