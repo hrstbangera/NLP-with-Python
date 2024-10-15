@@ -773,4 +773,100 @@ with col3:
 
 with col4:
     st.write("Other functionality here.")
+-----------------------------------------
+
+import streamlit as st
+
+# Simulate user input (you can replace this with actual user input logic)
+user_input = st.text_input("Enter something to enable buttons:")
+
+# Set session state for disabled buttons (for simulation)
+if 'disabledButtons' not in st.session_state:
+    st.session_state['disabledButtons'] = False
+
+# Define callbacks (as an example, these can be your actual logic)
+def feedback_like_callback():
+    st.session_state['disabledButtons'] = True
+    st.write("You clicked thumbs up!")
+
+def feedback_dislike_callback():
+    st.session_state['disabledButtons'] = True
+    st.write("You clicked thumbs down!")
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Define button styles for thumbs up, thumbs down, and copy button
+button_style = """
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+    vertical-align: middle;
+    height: 38px;
+    line-height: 38px;
+    box-sizing: border-box;
+"""
+button_hover_style = """
+    .custom-btn:hover {
+        border-color: black;
+    }
+"""
+
+# Create columns for layout
+col1, col2, col3, col4 = st.columns([0.5, 0.5, 4, 4])
+
+# Custom thumbs up button using st.markdown (instead of st.button)
+with col1:
+    if user_input:
+        st.markdown(f"""
+        <style>
+            {button_hover_style}
+        </style>
+        <div class="custom-btn" style="{button_style}" onclick="window.location.href='/like'">:+1:</div>
+        """, unsafe_allow_html=True)
+
+# Custom thumbs down button using st.markdown
+with col2:
+    if user_input:
+        st.markdown(f"""
+        <style>
+            {button_hover_style}
+        </style>
+        <div class="custom-btn" style="{button_style}" onclick="window.location.href='/dislike'">:-1:</div>
+        """, unsafe_allow_html=True)
+
+# Custom copy to clipboard button (with custom HTML and JS)
+with col3:
+    if user_input:
+        copy_button_html = f"""
+            <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+            <style>
+                .copy-btn {{
+                    {button_style}
+                }}
+                .copy-btn:hover {{
+                    border-color: black;
+                }}
+            </style>
+            <button class="copy-btn" onclick="copyFallback()">📋</button>
+
+            <script>
+                function copyFallback() {{
+                    var copyText = document.getElementById("textToCopy");
+                    copyText.select();
+                    document.execCommand('copy');
+                    alert('Text copied to clipboard!');
+                }}
+            </script>
+        """
+        st.components.v1.html(copy_button_html, height=50)
+
+with col4:
+    st.write("Other functionality here.")
 
