@@ -583,4 +583,51 @@ if st.button("Copy Text"):
 # Check if the button has been clicked
 if st.session_state['button_clicked']:
     st.write("Action has been performed!")
+------------------------
+import streamlit as st
+
+# Simulate user input (you can replace this with actual user input logic)
+user_input = st.text_input("Enter something to enable buttons:")
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Create four columns with the specified layout ratios
+col1, col2, col3, col4 = st.columns([0.5, 0.5, 4, 4])
+
+with col1:
+    if user_input:  # Only show the thumbs-up button if there's user input
+        # Button with rounded edges
+        if st.button("+1 👍", key="thumbs_up"):
+            st.write("You clicked thumbs up!")
+
+with col2:
+    if user_input:  # Only show the thumbs-down button if there's user input
+        # Button with rounded edges
+        if st.button("-1 👎", key="thumbs_down"):
+            st.write("You clicked thumbs down!")
+
+with col3:
+    if user_input:  # Only show the copy to clipboard button if there's user input
+        # Streamlit button for copying to clipboard
+        if st.button("📋 Copy to clipboard"):
+            # Inject the fallback JavaScript code for clipboard copying
+            copy_button_html = f"""
+                <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+                <script>
+                    function copyFallback() {{
+                        var copyText = document.getElementById("textToCopy");
+                        copyText.select();
+                        document.execCommand("copy");
+                        alert("Text copied to clipboard!");
+                    }}
+                    copyFallback();
+                </script>
+            """
+            # Inject the script to handle copying to clipboard
+            st.markdown(copy_button_html, unsafe_allow_html=True)
+
+# You can use col4 for other functionality or leave it empty for now.
+with col4:
+    st.write("Other functionality here.")
 
