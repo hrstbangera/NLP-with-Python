@@ -677,3 +677,100 @@ with col3:
 with col4:
     st.write("Other functionality here.")
 
+----------
+import streamlit as st
+
+# Define a button with custom HTML and CSS
+button_html = """
+    <style>
+    .custom-button {
+        display: inline-block;
+        background-color: #4CAF50; /* Green */
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 16px;
+        border-radius: 12px;
+        border: 2px solid #4CAF50;
+        transition-duration: 0.4s;
+        cursor: pointer;
+    }
+    .custom-button:hover {
+        background-color: white; 
+        color: black;
+        border: 2px solid #4CAF50;
+    }
+    </style>
+    <a href="#" class="custom-button">Click Me</a>
+"""
+
+# Display the custom button using st.markdown
+st.markdown(button_html, unsafe_allow_html=True)
+
+# Check for button click event
+if st.button("Trigger Action"):
+    st.write("Button was clicked!")
+
+---------------------------------------
+import streamlit as st
+
+# Simulate user input (you can replace this with actual user input logic)
+user_input = st.text_input("Enter something to enable buttons:")
+
+# Content to copy
+text_to_copy = "im pooki"
+
+# Create four columns with the specified layout ratios
+col1, col2, col3, col4 = st.columns([0.5, 0.5, 4, 4])
+
+with col1:
+    if user_input:  # Only show the thumbs-up button if there's user input
+        if st.button("+1 👍", key="thumbs_up"):
+            st.write("You clicked thumbs up!")
+
+with col2:
+    if user_input:  # Only show the thumbs-down button if there's user input
+        if st.button("-1 👎", key="thumbs_down"):
+            st.write("You clicked thumbs down!")
+
+with col3:
+    if user_input:  # Only show the copy to clipboard button if there's user input
+        # Display the copy to clipboard button using HTML with JavaScript
+        copy_button_html = f"""
+            <input type="text" value="{text_to_copy}" id="textToCopy" style="position: absolute; left: -9999px;">
+            <style>
+                .copy-btn {{
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                    background-color: white;
+                    border: 1px solid #ccc;
+                    line-height: 1;
+                    vertical-align: middle;
+                    transition: all 0.3s ease;
+                }}
+                .copy-btn:hover {{
+                    border-color: #007bff;
+                    box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+                    background-color: #f0f8ff;
+                }}
+            </style>
+            <button class="copy-btn" onclick="copyFallback()">
+                <p style="margin: 0; display: inline-block; vertical-align: middle;">📋 Copy to clipboard</p>
+            </button>
+
+            <script>
+                function copyFallback() {{
+                    var copyText = document.getElementById("textToCopy");
+                    copyText.select();
+                    document.execCommand('copy');
+                    alert('Text copied to clipboard!');
+                }}
+            </script>
+        """
+        # Render the HTML in Streamlit using components
+        st.components.v1.html(copy_button_html, height=50)
+
+with col4:
+    st.write("Other functionality here.")
+
