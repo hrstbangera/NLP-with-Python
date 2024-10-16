@@ -954,3 +954,49 @@ with col3:
 
 with col4:
     st.write("Other functionality here.")
+
+
+-----------------
+copy_button_html = f"""
+    <input type="text" value="{text_to_copy}" id="textToCopy" style="display: none;">  <!-- Hidden Input -->
+
+    <style>
+        .copy-btn {{
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 10px 20px;  /* Match padding */
+            height: 45px;  /* Match height */
+            line-height: 1.5;  /* Match line height */
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0;  /* Match margin */
+            box-sizing: border-box;  /* Ensure the border is included in the button size */
+        }}
+        .copy-btn:hover {{
+            border-color: black;
+        }}
+        .copy-container {{
+            display: inline-block;
+            vertical-align: middle;
+        }}
+    </style>
+
+    <div class="copy-container">
+        <button class="copy-btn" onclick="copyFallback()">📋</button>
+    </div>
+
+    <script>
+        function copyFallback() {{
+            var copyText = document.getElementById("textToCopy");
+            copyText.style.display = 'block';  // Temporarily display input for copy
+            copyText.select();
+            document.execCommand('copy');
+            copyText.style.display = 'none';  // Hide input again
+            alert('Text copied to clipboard!');
+        }}
+    </script>
+"""
+
