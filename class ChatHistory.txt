@@ -1,0 +1,32 @@
+class ChatHistory:
+    def __init__(self):
+        self.qa_history = []
+
+    def add_user_message(self, content):
+        """Add a user message to the chat history."""
+        self.qa_history.append({"role": "user", "content": content})
+
+    def add_assistant_message(self, content):
+        """Add an assistant message to the chat history, or an empty string if an error occurs."""
+        if content is None:
+            content = ""
+        self.qa_history.append({"role": "assistant", "content": content})
+
+    def get_history(self):
+        """Return the full chat history."""
+        return self.qa_history
+
+# Example usage
+chat = ChatHistory()
+chat.add_user_message("my name is harshith")
+
+# Simulate assistant response
+try:
+    # Simulate API call
+    assistant_response = "Nice to meet you, Harshith"  # replace this line with API call
+    chat.add_assistant_message(assistant_response)
+except Exception as e:
+    chat.add_assistant_message(None)  # Adds an empty response if an error occurs
+
+chat.add_user_message("what is my name?")
+print(chat.get_history())
