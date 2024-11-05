@@ -1,0 +1,117 @@
+import os
+from openai import OpenAI
+import PyPDF2
+import re
+import streamlit as st
+import pandas as pd
+
+# Initialize OpenAI client with your API key
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+# Reading and Extracting Text from Documents
+def read_pdf(file):
+    """
+    Reads a PDF file and extracts the text content.
+
+    Parameters:
+    file (UploadedFile): The uploaded PDF file.
+
+    Returns:
+    str: Extracted text from the PDF file.
+    """
+    try:
+        reader = PyPDF2.PdfReader(file)
+        text = ''
+        for page in reader.pages:
+            text += page.extract_text()
+        return text
+    except Exception as e:
+        st.error(f"Failed to read PDF file: {e}")
+        return None
+
+# Summarizing the Text
+def summarize_text(text, doc_type):
+    """
+    Summarizes the provided text by generating an overall summary and section summaries based on the document type.
+
+    Parameters:
+    text (str): The text content to be summarized.
+    doc_type (str): The type of document (e.g., "Scientific Article", "Clinical Note").
+
+    Returns:
+    dict: A dictionary containing the overall summary and summaries for each section.
+    """
+    if doc_type == "Scientific Article":
+        section_pattern = re.compile(r'\b(Abstract|Introduction|Methods|Results|Discussion|Conclusion|References|Appendix)\b', re.IGNORECASE)
+    elif doc_type == "Clinical Note":
+        # More flexible pattern to match potential section headers in clinical notes
+        section_pattern = re.compile(r'\b(HPI:|History of Present Illness:|PMH:|Past Medical History:|ROS:|Review of Systems:|Physical Exam:|Assessment:|Plan:|Medications:|Allergies:|Immunizations:|Lab Results:|Imaging Studies:|Discharge Summary:|Follow-Up:|Summary:|Report:|Details:|Analysis:)\b', re.IGNORECASE)
+    else:
+        section_pattern = re.compile(r'\b(Section\s*\d+|Chapter\s*\d+|Part\s*\d+)\b', re.IGNORECASE)
+
+    sections = section_pattern.split(text)
+    section_titles = [sections[i].strip() for i in range(1, len(sections), 2)]
+    section_contents = [sections[i + 1].strip() for i in range(1, len(sections) - 1, 2)]
+
+    # Generate an overall summary for the entire document
+    overall_summary = client.chat.completions.create(
+        messages=[
+            {"role": "user", "content": f"Please provide an overall summary for this {doc_type.lower()}: {text}"}
+        ],
+        model="gpt-3.5-turbo",
+    )
+
+    summaries = {"overall_summary": overall_summary.choices[0].message.content, "section_summaries": []}
+
+    # Pairing section titles with their corresponding text and avoiding duplicate sections
+    processed_titles = set()
+    for title, content in zip(section_titles, section_contents):
+        if title.lower() not in processed_titles and content:
+            processed_titles.add(title.lower())
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": f"Please summarize the following section titled '{title}' in this {doc_type.lower()}: {content}"}
+                ],
+                model="gpt-3.5-turbo",
+            )
+            summaries["section_summaries"].append((title, chat_completion.choices[0].message.content))
+
+    return summaries
+
+# Creating the Streamlit App
+def main():
+    """
+    Main function to run the Streamlit app for document and data summarization.
+    """
+    st.title("AI-powered Document Summarization Tool")
+    st.write("Upload a document (PDF or text) and select the document type for summarization.")
+    uploaded_file = st.file_uploader("Upload document (PDF or text)", type=["pdf", "txt"])
+    document_type = st.selectbox("Select document type", ["Scientific Article", "Clinical Note", "Other"])
+
+    if uploaded_file is not None:
+        file_type = uploaded_file.name.split('.')[-1].lower()
+        if file_type in ['pdf', 'txt']:
+            text = read_pdf(uploaded_file) if file_type == 'pdf' else str(uploaded_file.read(), 'utf-8')
+            summaries = summarize_text(text, document_type)
+
+            if summaries:
+                st.header("Overall Summary")
+                st.write(summaries["overall_summary"])  # Display the overall summary
+                
+                # Check if there are section summaries to display
+                if summaries["section_summaries"]:
+                    st.header("Section Summaries")
+                    for title, summary in summaries["section_summaries"]:
+                        st.subheader(f"{title}")
+                        st.markdown(summary)
+                else:
+                    st.write("No sections found in the document.")
+            else:
+                st.error("Failed to generate summaries.")
+        else:
+            st.error("Unsupported file type. Please upload a PDF or text file.")
+    else:
+        st.info("Please upload a document to start summarization.")
+
+if __name__ == "__main__":
+    main()
