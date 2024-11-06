@@ -1,0 +1,27 @@
+import streamlit as st
+
+# Load summary from local text file
+def load_summary():
+    with open("summary.txt", "r") as file:
+        summary = file.read()
+    return summary
+
+# Streamlit UI
+st.title("Chatbot with Summary Feature")
+
+# Button to trigger the summary
+if st.button("Show Summary"):
+    # Load the summary content
+    summary_content = load_summary()
+    
+    # JavaScript to open a new window with the summary content
+    js_code = f"""
+    <script>
+        var newWindow = window.open("", "_blank", "width=600,height=400");
+        newWindow.document.write("<pre>{summary_content}</pre>");
+        newWindow.document.title = "Summary";
+        newWindow.document.close();
+    </script>
+    """
+    # Inject the JavaScript code into Streamlit
+    st.components.v1.html(js_code)
