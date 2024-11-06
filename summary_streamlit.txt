@@ -68,4 +68,46 @@ if st.button("Show Summary"):
     # Clean up the temporary HTML file after download (optional)
     if os.path.exists(html_file):
         os.remove(html_file)
+---------------
+import streamlit as st
+import os
+
+# Load summary from a local text file or create it if it doesn't exist
+def load_summary():
+    filename = "summary.txt"
+    
+    if os.path.exists(filename):
+        with open(filename, "r") as file:
+            summary = file.read()
+    else:
+        summary = "This is a default summary content."
+        with open(filename, "w") as file:
+            file.write(summary)
+
+    return summary
+
+# Main Streamlit app
+st.title("Chatbot with Summary Feature")
+
+# Button to open/close the summary
+show_summary = st.button("Show Summary")
+
+# If the button is clicked, display the summary in a container
+if show_summary:
+    summary_content = load_summary()
+
+    # Create a container to display the summary content as a modal
+    with st.container():
+        st.markdown(
+            """
+            <div style="background-color: #f0f0f0; padding: 10px; border-radius: 10px; width: 60%; margin: auto;">
+                <h4>Summary</h4>
+                <p style="white-space: pre-wrap;">{}</p>
+                <button onclick="window.location.reload()" style="margin-top: 10px; padding: 5px 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+            """.format(summary_content),
+            unsafe_allow_html=True
+        )
 
