@@ -1,0 +1,70 @@
+To install or upgrade sqlite3 to a specific version using apt, you may need to follow these steps, depending on the version available in your system's package repository.
+
+1. Check Available Version in Your Repository
+Run the following command to see the latest SQLite version available in your current repository:
+
+bash
+Copy
+Edit
+sudo apt policy sqlite3
+This will show the installed version and the candidate version available for installation.
+
+2. Install the Latest Version from the Default Repository
+If the desired version (e.g., 3.35 or higher) is available in your system's repository:
+
+bash
+Copy
+Edit
+sudo apt update
+sudo apt install sqlite3
+After installation, verify the version:
+
+bash
+Copy
+Edit
+sqlite3 --version
+3. Add a Newer Repository (if required)
+If your default repository doesn't provide the required version, add a PPA that includes a newer version of SQLite. For Ubuntu-based systems:
+
+bash
+Copy
+Edit
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt update
+sudo apt install sqlite3
+4. Manually Install SQLite (if version is still outdated)
+If the package manager doesn't offer the required version, install it manually:
+
+a) Download the Source Code
+Visit the SQLite Download Page and copy the link to the latest source tarball (e.g., sqlite-autoconf-3410200.tar.gz for SQLite 3.41.2).
+
+b) Install Build Dependencies
+bash
+Copy
+Edit
+sudo apt update
+sudo apt install build-essential libreadline-dev
+c) Compile and Install SQLite
+bash
+Copy
+Edit
+wget https://www.sqlite.org/2025/sqlite-autoconf-3410200.tar.gz
+tar xzvf sqlite-autoconf-3410200.tar.gz
+cd sqlite-autoconf-3410200
+./configure
+make
+sudo make install
+d) Verify Installation
+bash
+Copy
+Edit
+sqlite3 --version
+5. Ensure Python Uses the New SQLite
+Run the following in Python to confirm the updated version:
+
+python
+Copy
+Edit
+import sqlite3
+print(sqlite3.sqlite_version)
+If Python is still using an older SQLite version, you may need to rebuild or reinstall Python. Let me know if you need help with that! 😊
