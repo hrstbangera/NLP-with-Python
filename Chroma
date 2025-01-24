@@ -1,0 +1,25 @@
+import os
+
+# Get the installed file location
+chromadb_init_path = os.path.join(os.path.dirname(chromadb.__file__), '__init__.py')
+
+# Read the file content
+with open(chromadb_init_path, 'r') as file:
+    content = file.readlines()
+
+# Add new import lines
+new_imports = [
+    "import your_custom_module\n",
+    "from your_custom_module import your_function\n"
+]
+
+# Avoid duplicating imports
+for imp in new_imports:
+    if imp not in content:
+        content.insert(0, imp)  # Add at the beginning
+
+# Write back the modified content
+with open(chromadb_init_path, 'w') as file:
+    file.writelines(content)
+
+print(f"Modified {chromadb_init_path} successfully!")
