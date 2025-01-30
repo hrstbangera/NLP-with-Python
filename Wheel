@@ -1,0 +1,2 @@
+mkdir -p /dbfs/path/to/filtered_wheels
+find /dbfs/path/to/wheel_files -type f -name "*.whl" ! -name "*cp310*" -exec mv {} /dbfs/path/to/filtered_wheels/ \;
