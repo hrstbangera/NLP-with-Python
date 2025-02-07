@@ -128,3 +128,59 @@ print(pipeline.get_answer("What is AI?", mode="existing"))
 
 # Save embeddings after updates
 pipeline.save_vector_store()
+---------------------------------------------------------------------
+from langchain.vectorstores import Chroma
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.retrievers import ParentDocumentRetriever
+
+class RAGPipeline:
+    def __init__(self, persist_directory="chroma_db", embedding_model=None):
+        self.persist_directory = persist_directory
+        self.embedding_model = embedding_model or OpenAIEmbeddings()
+        self.vector_db = self.load_chroma_db()
+        self.retriever = ParentDocumentRetriever(self.vector_db)
+    
+    def load_chroma_db(self):
+        """Load ChromaDB or initialize a new one."""
+        return Chroma(
+            collection_name="rag_collection",
+            embedding_function=self.embedding_model,
+            persist_directory=self.persist_directory
+        )
+
+    def add_to_vector_store(self, text, metadata=None):
+        """Add a new document with embeddings."""
+        self.vector_db.add_texts([text], metadatas=[metadata] if metadata else None)
+        self.vector_db.persist()
+        print(f"Added and persisted text: {text}")
+
+    def retrieve_existing_embeddings(self, query):
+        """Retrieve documents based on existing embeddings."""
+        results = self.retriever.get_relevant_documents(query)
+        return results
+
+    def generate_or_fetch_answer(self, question, mode="new"):
+        """
+        Handle new embedding generation or fetch existing embeddings.
+        """
+        if mode == "existing":
+            docs = self.retrieve_existing_embeddings(question)
+            if docs:
+                return f"Found relevant document: {docs[0].page_content}"
+            else:
+                return "No relevant document found."
+
+        # Add a new document to vector store and retrieve
+        self.add_to_vector_store(question, {"source": "user_query"})
+        return f"Answer generated using a new embedding for: '{question}'"
+
+# Example Usage
+embedding_model = OpenAIEmbeddings()
+pipeline = RAGPipeline(embedding_model=embedding_model)
+
+# Generate new embedding and store it
+print(pipeline.generate_or_fetch_answer("What is AI?", mode="new"))
+
+# Fetch from existing stored embeddings
+print(pipeline.generate_or_fetch_answer("What is AI?", mode="existing"))
+
