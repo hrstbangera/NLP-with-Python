@@ -1,0 +1,130 @@
+import pandas as pd
+from ragas import EvaluationPipeline  # Assuming RAGAS installed
+from ragas.metrics import exact_match, f1_score, rouge_l
+from openpyxl import Workbook
+
+class RAGEvaluator:
+    def __init__(self, csv_path, rag_pipeline, output_excel_path="evaluation_metrics.xlsx"):
+        self.csv_path = csv_path
+        self.rag_pipeline = rag_pipeline
+        self.output_excel_path = output_excel_path
+        self.metrics_functions = [exact_match, f1_score, rouge_l]
+    
+    def load_data(self):
+        """Load questions and ground truth answers from the CSV."""
+        data = pd.read_csv(self.csv_path)
+        if not {"question", "ground_truth"}.issubset(data.columns):
+            raise ValueError("CSV must contain 'question' and 'ground_truth' columns.")
+        return data
+
+    def generate_answers(self, questions):
+        """Generate answers using the RAG pipeline."""
+        return [self.rag_pipeline(question) for question in questions]
+
+    def evaluate_and_save(self, questions, ground_truths, generated_answers):
+        """Compute metrics and save them to Excel."""
+        # Initialize RAGAS evaluation pipeline
+        eval_pipeline = EvaluationPipeline(self.metrics_functions)
+        
+        results = []
+        for i, (question, ground_truth, generated_answer) in enumerate(zip(questions, ground_truths, generated_answers)):
+            evaluation = eval_pipeline.evaluate(ground_truth, generated_answer)
+            result = {
+                "Question": question,
+                "Ground Truth": ground_truth,
+                "Generated Answer": generated_answer,
+                "Exact Match": evaluation["exact_match"],
+                "F1 Score": evaluation["f1_score"],
+                "ROUGE-L": evaluation["rouge_l"],
+            }
+            results.append(result)
+        
+        # Save metrics to Excel
+        df_results = pd.DataFrame(results)
+        df_results.to_excel(self.output_excel_path, index=False)
+        print(f"Evaluation metrics saved to {self.output_excel_path}")
+
+    def run_evaluation(self):
+        """Run the complete evaluation process."""
+        data = self.load_data()
+        questions = data["question"].tolist()
+        ground_truths = data["ground_truth"].tolist()
+        
+        print("Generating answers from RAG pipeline...")
+        generated_answers = self.generate_answers(questions)
+        
+        print("Evaluating and saving results...")
+        self.evaluate_and_save(questions, ground_truths, generated_answers)
+
+
+# Example Usage:
+def rag_pipeline_example(question):
+    # Replace this with your RAG pipeline call
+    return f"Sample answer for: {question}"
+
+# Initialize and run the evaluation
+evaluator = RAGEvaluator("questions_ground_truth.csv", rag_pipeline_example)
+evaluator.run_evaluation()
+-----------------------------
+
+
+from typing import Optional
+import faiss
+import numpy as np
+
+class RAGPipeline:
+    def __init__(self, embedding_model, vector_store_path="embeddings_store.index"):
+        self.embedding_model = embedding_model
+        self.vector_store_path = vector_store_path
+        self.index = self.load_vector_store()
+
+    def load_vector_store(self) -> Optional[faiss.IndexFlatL2]:
+        """Load the vector store if it exists, or create a new one."""
+        try:
+            index = faiss.read_index(self.vector_store_path)
+            print("Loaded existing vector store.")
+        except Exception:
+            print("Creating new vector store.")
+            index = faiss.IndexFlatL2(768)  # Assuming embedding size of 768
+        return index
+
+    def save_vector_store(self):
+        """Save the vector store to disk."""
+        faiss.write_index(self.index, self.vector_store_path)
+
+    def generate_or_fetch_embedding(self, text: str, mode: str = "new") -> np.ndarray:
+        """Generate a new embedding or fetch an existing one based on mode."""
+        if mode == "existing":
+            # In real use, you might search for similar embeddings here.
+            print(f"Fetching stored embedding for: '{text}' (dummy fetch for demo)")
+            # Return dummy vector for the example
+            return np.random.rand(768).astype(np.float32)
+
+        # Generate a new embedding
+        embedding = self.embedding_model.encode([text])[0]
+        self.index.add(np.array([embedding]))
+        print(f"Generated and stored new embedding for: '{text}'")
+        return embedding
+
+    def get_answer(self, question: str, mode: str = "new") -> str:
+        """Generate an answer using embeddings."""
+        embedding = self.generate_or_fetch_embedding(question, mode)
+        # Placeholder for generating response using RAG process
+        return f"Answer generated using {'new' if mode == 'new' else 'existing'} embedding."
+
+
+# Example Usage
+class DummyEmbeddingModel:
+    def encode(self, texts):
+        # Replace with actual embedding logic
+        return [np.random.rand(768).astype(np.float32) for _ in texts]
+
+embedding_model = DummyEmbeddingModel()
+pipeline = RAGPipeline(embedding_model)
+
+# Test modes
+print(pipeline.get_answer("What is AI?", mode="new"))
+print(pipeline.get_answer("What is AI?", mode="existing"))
+
+# Save embeddings after updates
+pipeline.save_vector_store()
