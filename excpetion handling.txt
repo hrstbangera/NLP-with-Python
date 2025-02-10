@@ -81,3 +81,79 @@ except DocumentProcessingError as dpe:
 
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
+---------------------------------------------------------------
+
+from fastapi import HTTPException
+
+class DocumentRetrievalError(Exception):
+    """Raised when document retrieval fails."""
+    pass
+
+class StreamingResponseError(Exception):
+    """Raised during streaming response issues."""
+    pass
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(DocumentRetrievalError)
+async def document_retrieval_error_handler(request: Request, exc: DocumentRetrievalError):
+    return JSONResponse(
+        status_code=404,
+        content={"error": "Relevant documents could not be retrieved from Chroma DB."},
+    )
+
+@app.exception_handler(StreamingResponseError)
+async def streaming_error_handler(request: Request, exc: StreamingResponseError):
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Error while generating streaming response."},
+    )
+
+
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import StreamingResponse, JSONResponse
+import json
+
+app = FastAPI()
+
+@app.post("/stream")
+async def stream(request: Request):
+    try:
+        # Parse user input
+        inputs = await request.json()
+        user_input = inputs["inputs"]["question"]
+
+        # Fetch relevant documents from Chroma DB
+        if not user_input:
+            raise DocumentRetrievalError("No user input provided for document retrieval.")
+
+        ### Placeholder for your actual logic ###
+        stream = []  # Replace with actual stream generator logic
+        
+        # Streaming generator for RAG response
+        async def rai_stream_gen(stream):
+            async for chunk in stream:
+                yield (chunk, False, "No source, this is streaming")
+            yield ("", True, "Unique documents")
+
+        # Format streaming generator output
+        async def formatted_stream_gen(gen):
+            async for items in gen:
+                yield json.dumps(items)
+
+        return StreamingResponse(
+            formatted_stream_gen(rai_stream_gen(stream)),
+            media_type="text/explain"
+        )
+
+    except DocumentRetrievalError as dre:
+        # Map custom exception to a response
+        raise HTTPException(status_code=404, detail=str(dre))
+
+    except KeyError as ke:
+        raise HTTPException(status_code=400, detail="Malformed input. Missing required keys.")
+
+    except Exception as e:
+        raise StreamingResponseError(f"Unexpected error: {e}")
+
