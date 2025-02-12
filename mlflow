@@ -1,0 +1,25 @@
+import mlflow
+
+# Set the experiment (optional)
+mlflow.set_experiment("/Users/your-email@domain.com/your-experiment-name")
+
+# Start an MLflow run
+mlflow.start_run()
+
+# Log parameters and metrics
+mlflow.log_param("param1", 10)
+mlflow.log_metric("metric1", 0.95)
+
+# Log an artifact
+with open("/dbfs/tmp/output.txt", "w") as f:
+    f.write("Hello, MLflow!")
+mlflow.log_artifact("/dbfs/tmp/output.txt")
+
+# End the run
+mlflow.end_run()
+
+# Display the experiment link
+displayHTML("<a href='{}/#mlflow/experiments/{}'>View Experiment</a>".format(
+    dbutils.notebook.entry_point.getDbutils().notebook().getContext().browserHostName().get(),
+    mlflow.active_run().info.experiment_id
+))
