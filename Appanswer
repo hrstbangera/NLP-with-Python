@@ -1,0 +1,46 @@
+import pandas as pd
+import requests
+import json
+
+# File paths
+input_excel_path = 'questions.xlsx'  # Input Excel file with questions
+output_excel_path = 'output.xlsx'    # Output Excel file with questions and answers
+
+# Backend URL
+backend_url = 'http://localhost/stream'
+
+def read_questions_from_excel(file_path):
+    df = pd.read_excel(file_path)
+    if 'question' not in df.columns:
+        raise ValueError("Excel file must contain a 'question' column")
+    return df['question'].tolist()
+
+def get_answer_from_backend(question):
+    headers = {'Content-Type': 'application/json'}
+    payload = {'input': {'question': question}}
+
+    try:
+        response = requests.post(backend_url, headers=headers, json=payload)
+        response.raise_for_status()  # Raise error for bad status codes
+        return response.json().get('answer', 'No answer returned')
+    except requests.RequestException as e:
+        print(f"Error for question '{question}': {e}")
+        return 'Error'
+
+def save_to_excel(data, file_path):
+    df = pd.DataFrame(data)
+    df.to_excel(file_path, index=False)
+    print(f"Results saved to {file_path}")
+
+def main():
+    questions = read_questions_from_excel(input_excel_path)
+
+    results = []
+    for question in questions:
+        answer = get_answer_from_backend(question)
+        results.append({'question': question, 'answer': answer})
+
+    save_to_excel(results, output_excel_path)
+
+if __name__ == '__main__':
+    main()
