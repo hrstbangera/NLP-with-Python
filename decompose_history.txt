@@ -1,0 +1,87 @@
+from openai import OpenAI
+import json
+
+client = OpenAI(api_key="your-api-key")
+
+# Tool schema definition
+rag_tool = {
+    "type": "function",
+    "function": {
+        "name": "prepare_rag_query",
+        "description": "Prepares user query for a RAG system by either decomposing, rephrasing using chat history, or returning it as-is.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_question": {
+                    "type": "string",
+                    "description": "The current user question."
+                },
+                "chat_history": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Previous messages for context, if any."
+                }
+            },
+            "required": ["user_question"]
+        }
+    }
+}
+
+# Example inputs
+chat_history = [
+    "Tell me about Apple's performance.",
+    "Did they grow last year?"
+]
+user_question = "What about its sales in 2023?"
+
+# Make the function/tool call
+response = client.chat.completions.create(
+    model="gpt-4-0613",
+    messages=[
+        {"role": "system", "content": "You are a RAG query optimizer. You decide if a user query should be rephrased using history, decomposed if complex, or returned as-is for retrieval."},
+        {"role": "user", "content": f"user_question: {user_question}\nchat_history: {chat_history}"}
+    ],
+    tools=[rag_tool],
+    tool_choice={"type": "function", "function": {"name": "prepare_rag_query"}}
+)
+
+# Extract tool call
+tool_call = response.choices[0].message.tool_calls[0]
+arguments = json.loads(tool_call.function.arguments)
+
+print(f"\n🔧 Tool Called: {tool_call.function.name}")
+print(f"🧾 Arguments Passed:\n{json.dumps(arguments, indent=2)}")
+
+# Simulated local implementation of the tool
+def prepare_rag_query(user_question, chat_history=None):
+    chat_history = chat_history or []
+
+    # Example logic (simple heuristic for demo)
+    if any(q in user_question.lower() for q in ["compare", "difference", "pros and cons"]):
+        return {
+            "query_type": "decomposed",
+            "queries": [
+                "What is Tesla's battery strategy?",
+                "What is Toyota's hybrid strategy?",
+                "How do they compare?"
+            ]
+        }
+    elif "sales" in user_question.lower() and chat_history:
+        return {
+            "query_type": "rephrased",
+            "queries": ["What were Apple's sales in 2023?"]
+        }
+    else:
+        return {
+            "query_type": "as_is",
+            "queries": [user_question]
+        }
+
+# Call the local function with the LLM-decided arguments
+result = prepare_rag_query(**arguments)
+
+# Output the final result
+print(f"\n✅ Final Output:")
+print(f"Query Type: {result['query_type']}")
+for idx, q in enumerate(result["queries"], 1):
+    print(f"{idx}. {q}")
