@@ -85,3 +85,68 @@ print(f"\n✅ Final Output:")
 print(f"Query Type: {result['query_type']}")
 for idx, q in enumerate(result["queries"], 1):
     print(f"{idx}. {q}")
+
+
+
+--------------------
+def prepare_rag_query(user_question, chat_history=None):
+    """
+    Prepares a RAG-friendly version of a user question.
+    Returns:
+    - query_type: 'as_is', 'rephrased', or 'decomposed'
+    - queries: list of questions
+    """
+    # Here you might apply additional logic locally if needed
+    # But for this example, assume the LLM determines the output
+    return {
+        "query_type": "as_is",
+        "queries": [user_question]
+    }
+
+
+rag_tool_schema = {
+    "name": "prepare_rag_query",
+    "description": "Analyzes a user query and chat history to prepare optimized questions for document retrieval in a RAG system.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "user_question": {
+                "type": "string",
+                "description": "The current user question."
+            },
+            "chat_history": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of previous chat messages for context."
+            }
+        },
+        "required": ["user_question"]
+    }
+}
+
+import openai
+import json
+
+openai.api_key = OPENAI_API_KEY
+
+response = openai.chat.completions.create(
+    model="gpt-4-0613",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant that prepares questions for a RAG-based system."},
+        {"role": "user", "content": "What about its sales in 2023?"},
+    ],
+    functions=[rag_tool_schema],
+    function_call={"name": "prepare_rag_query"}
+)
+
+function_call = response.choices[0].message.function_call
+args = json.loads(function_call.arguments)
+
+# Call your local Python function using the extracted arguments
+result = prepare_rag_query(args['user_question'], args.get('chat_history', []))
+
+print(f"\nQuery Type: {result['query_type']}")
+print("Queries:")
+for q in result['queries']:
+    print("-", q)
+
