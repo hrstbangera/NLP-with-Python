@@ -150,3 +150,53 @@ print("Queries:")
 for q in result['queries']:
     print("-", q)
 
+-------------------------
+from openai import OpenAI
+import json
+
+client = OpenAI(api_key="your-api-key")
+
+# Chat history and user question
+chat_history = [
+    {"role": "user", "content": "Tell me about Apple's performance."},
+    {"role": "assistant", "content": "It was good... sales increased by 10%..."}
+]
+user_question = "What about its sales in 2023?"
+
+# System prompt
+system_prompt = """
+You are a RAG query optimizer. Based on the user query and previous conversation, prepare the question for retrieval.
+
+Respond ONLY in the following JSON format:
+{
+  "query_type": "rephrased" | "decomposed" | "as_is",
+  "queries": ["..."]
+}
+
+Guidelines:
+- If the question is complex or multi-hop, decompose it into smaller queries.
+- If the question depends on previous messages, rephrase it as a standalone question.
+- If the question is already self-contained, return it as-is.
+"""
+
+# Run chat completion
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": system_prompt},
+        *chat_history,
+        {"role": "user", "content": user_question}
+    ],
+    temperature=0.2
+)
+
+# Parse the response
+response_content = response.choices[0].message.content
+try:
+    result = json.loads(response_content)
+    print("✅ Parsed Result:")
+    print(json.dumps(result, indent=2))
+except Exception as e:
+    print("⚠️ Could not parse JSON:", response_content)
+
+
