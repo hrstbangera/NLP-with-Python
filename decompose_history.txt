@@ -198,5 +198,73 @@ try:
     print(json.dumps(result, indent=2))
 except Exception as e:
     print("⚠️ Could not parse JSON:", response_content)
+--------------
+from openai import OpenAI
+import json
+
+client = OpenAI(api_key="your-api-key")
+
+chat_history = [
+    {"role": "user", "content": "Do I need to report 529 plan that I invested in? I'm an officer."}
+]
+
+system_prompt = """
+You are a RAG query optimizer that prepares questions for document retrieval.
+
+Your job is to decide whether a question:
+- Should be **decomposed** into multiple focused sub-questions for better retrieval
+- Should be **rephrased** into a standalone question because it depends on chat history
+- Or is already **suitable as-is**
+
+Respond ONLY in the following JSON format:
+{
+  "query_type": "rephrased" | "decomposed" | "as_is",
+  "queries": ["..."]
+}
+
+### Decomposition Instructions:
+- If the question involves **multiple entities**, **roles**, or **conditional logic**, break it down.
+- Include queries that ask for:
+  - **Definition or explanation** of terms (e.g., "What are 529 plans?")
+  - **Reporting requirements**
+  - **Exceptions** (e.g., based on nationality, position, investment tier)
+- Generate **5–7 atomic queries** when decomposing.
+
+### Examples:
+User: "Do I need to report 529 plan that I invested in? I'm an officer."
+Return:
+{
+  "query_type": "decomposed",
+  "queries": [
+    "Do 529 plans need to be reported?",
+    "Are 529 plans reportable?",
+    "Do officers need to report 529 plans?",
+    "What are 529 plans?",
+    "Are there exceptions for reporting 529 plans based on tiers?",
+    "Are there exceptions for 529 plans based on nationality?",
+    "Are there special rules for officers reporting 529 plans?"
+  ]
+}
+"""
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": system_prompt},
+        *chat_history
+    ],
+    temperature=0.3
+)
+
+response_content = response.choices[0].message.content
+
+# Parse and print
+try:
+    result = json.loads(response_content)
+    print("✅ Final Output:")
+    print(json.dumps(result, indent=2))
+except json.JSONDecodeError as e:
+    print("⚠️ Failed to parse JSON. Raw content:")
+    print(response_content)
 
 
