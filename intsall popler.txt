@@ -28,3 +28,42 @@ def install_poppler_utils():
 install_poppler_utils()
 
 subprocess.run(['sudo', 'apt-get', 'install', 'poppler-utils', '-y', '--fix-missing'], check=True)
+------------------
+
+import subprocess
+import sys
+
+def run_command(command, description, shell=False):
+    """Helper function to run a command and check for errors."""
+    print(f"Running: {description}")
+    try:
+        result = subprocess.run(
+            command,
+            check=True,
+            shell=shell,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        print("Success!")
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Error in {description}: {e.stderr}")
+        sys.exit(1)
+
+# Set the proxy (modify if needed)
+proxy = "http://abc.com:80"
+
+# Run the commands sequentially
+commands = [
+    (["sudo", "apt-get", "clean"], "Cleaning apt cache"),
+    (["sudo", "rm", "-vf", "/var/lib/apt/lists/*"], "Removing old package lists"),
+    (["sudo", "http_proxy=" + proxy, "apt-get", "update"], "Updating package list"),
+    (["sudo", "http_proxy=" + proxy, "apt-get", "install", "poppler-utils", "-y", "--fix-missing"], "Installing poppler-utils"),
+]
+
+for cmd, desc in commands:
+    run_command(cmd, desc)
+
+print("All commands executed successfully!")
+# Now you can run other Python code here
