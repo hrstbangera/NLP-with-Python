@@ -1,0 +1,30 @@
+import subprocess
+
+def install_poppler_utils():
+    try:
+        # Clean up apt cache (optional but recommended)
+        subprocess.run(['sudo', 'apt-get', 'clean'], check=True)
+        subprocess.run(['sudo', 'rm', '-rf', '/var/lib/apt/lists/*'], check=True)
+        
+        # Update package list
+        subprocess.run(['sudo', 'apt-get', 'update'], check=True)
+
+        # Install poppler-utils with optional proxy
+        subprocess.run([
+            'sudo',
+            'http_proxy=http://abc.com:80',
+            'apt-get',
+            'install',
+            'poppler-utils',
+            '-y',
+            '--fix-missing'
+        ], check=True, shell=True)
+
+        print("✅ poppler-utils installed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Installation failed: {e}")
+
+# Call the function
+install_poppler_utils()
+
+subprocess.run(['sudo', 'apt-get', 'install', 'poppler-utils', '-y', '--fix-missing'], check=True)
