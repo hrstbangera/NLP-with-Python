@@ -1,0 +1,16 @@
+import json
+
+def clean_for_json(text: str) -> str:
+    replacements = {
+        '“': '"',
+        '”': '"',
+        '’': "'",
+        '‘': "'",
+    }
+    for orig, repl in replacements.items():
+        text = text.replace(orig, repl)
+    return json.dumps(text)[1:-1]  # escape + strip outer quotes
+
+# Usage
+cleaned = clean_for_json('spouse’s “To Do” list')
+print(cleaned)  # spouse's "To Do" list
