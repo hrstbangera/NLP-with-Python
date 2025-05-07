@@ -14,3 +14,28 @@ def clean_for_json(text: str) -> str:
 # Usage
 cleaned = clean_for_json('spouse’s “To Do” list')
 print(cleaned)  # spouse's "To Do" list
+
+------------
+import json
+import re
+
+def clean_for_json(text: str) -> str:
+    replacements = {
+        '“': '"', '”': '"',
+        '‘': "'", '’': "'",
+        '–': '-', '—': '-',
+        '…': '...',
+        '\u00a0': ' ',   # non-breaking space
+        '\u200b': '',    # zero-width space
+        '\u200e': '', '\u200f': '',  # LTR/RTL
+        '\u00ad': '',    # soft hyphen
+    }
+    for orig, repl in replacements.items():
+        text = text.replace(orig, repl)
+    text = re.sub(r'[^\x00-\x7F]+', '', text)  # optional: strip remaining non-ASCII
+    return json.dumps(text)[1:-1]
+
+# Usage
+cleaned = clean_for_json('The cost is 50 – 70 USD … with “terms”.')
+print(cleaned)
+
