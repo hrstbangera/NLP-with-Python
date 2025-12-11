@@ -1,0 +1,107 @@
+1. Preprocessing (binarize, deskew, denoise)
+2. Page Layout Analysis (find blocks, lines)
+3. Line & Word Detection
+4. Character Segmentation
+5. Character Recognition (LSTM / classifier)
+6. Final Text Assembly
+
+Example Text:
+THE QUICK BROWN FOX
+JUMPS OVER THE DOG
+
+Step 1: Line Detection
+[ THE QUICK BROWN FOX ]
+[ JUMPS OVER THE DOG ]
+
+Step 2: Word Segmentation
+THE | QUICK | BROWN | FOX
+JUMPS | OVER | THE | DOG
+
+Step 3: Character Segmentation
+F O X → F | O | X
+DOG → D | O | G
+
+Step 4: Character Recognition
+
+Segments → Features → LSTM → Characters
+Example: F | O | X → 'FOX'
+
+Final Output
+
+THE QUICK BROWN FOX
+JUMPS OVER THE DOG
+
+
+----
+Vision-Language Models cut an image into many small patches, convert each patch into a token, process them like a sequence, and then the LLM reconstructs the text from the global pattern across all tokens.”
+
+
+How VLMs Extract Text from Images
+From Pixels to Predictions – An End-to-End Walkthrough
+
+
+The Core Concept: It's Not Reading, It's Translation
+
+Traditional OCR (Optical Character Recognition) is Pattern Matching.
+VLMs (Vision-Language Models) treat the image as a foreign language.
+Key Difference: It *translates* the visual language into a textual language.
+
+Our Example Input: 'SPEED LIMIT 25'
+
+We will track the extraction process for a simple sign.
+Visual: A road sign reading 'SPEED LIMIT 25'.
+Goal: The model must correctly output the text 'SPEED'.
+
+Phase 1: The 'Eyes' (Vision Encoder)
+
+Patching: The image is cut into a grid of tiny squares (patches).
+Flattening: Each patch is converted into a numerical vector (list of numbers).
+Insight: The model only sees vectors representing visual features (curved line, black color, etc.), not letters.
+
+
+Phase 2: The 'Bridge' (Alignment)
+
+Purpose: To connect the Vision Encoder (pixels/math) to the Language Decoder (words/concepts).
+The Bridge (Projector) translates the visual vectors into text-compatible token embeddings.
+Translation: The vector for the 'S-shape' is mapped to the *concept* of the letter 'S' in the LLM's vocabulary.
+
+
+Purpose: To connect the Vision Encoder (pixels/math) to the Language Decoder (words/concepts).
+The Bridge (Projector) translates the visual vectors into text-compatible token embeddings.
+Translation: The vector for the 'S-shape' is mapped to the *concept* of the letter 'S' in the LLM's vocabulary.
+
+
+This is the **Autoregressive Generation** step.
+The model plays 'Guess the Next Token' based on the visual input and previously generated text.
+Analogy: Advanced smartphone Autocomplete using an image as the context.
+
+
+Generating 'SPEED' Token by Token
+
+
+Step 1 (Input: Visual Start) -> Prediction: S
+Step 2 (Input: Visual + 'S') -> Prediction: P
+Step 3 (Input: Visual + 'SP') -> Prediction: E
+Step 4 (Input: Visual + 'SPE') -> Prediction: E
+Step 5 (Input: Visual + 'SPEE') -> Prediction: D
+Final Output: The model generates the entire word 'SPEED' based on the continuous visual and textual context.
+
+
+The Power of Prediction: Context Over Pixels
+
+Scenario: The 'E' is dirty and blurry.
+Traditional OCR: Sees a smudge -> Fails or outputs 'SPFED'.
+VLM: Sees 'SP...' and knows 'SPEED' is a common word in this visual context.
+Result: VLM predicts 'E' because it uses semantic *context* to fix visual errors.
+
+
+Summary: The End-to-End Flow
+
+
+VLMs don't just extract characters; they generate full, contextually accurate text.
+This end-to-end approach (Image $_x000D_ightarrow$ Encoder $_x000D_ightarrow$ Decoder) handles complex layouts, tables, and poor quality images better than traditional methods.
+This is the foundation for models like GPT-4V, Donut, and TrOCR.
+
+
+
+	
